@@ -7,7 +7,7 @@ import java.util.*;
 public class MainModule {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        OrderProcessor op = new OrderProcessor();
+        OrderProcessor op = new OrderProcessor(); // Uses DBConnUtil internally
 
         while (true) {
             System.out.println("\n===== ORDER MANAGEMENT SYSTEM =====");
@@ -20,7 +20,7 @@ public class MainModule {
             System.out.println("7. Exit");
             System.out.print("Enter your choice: ");
             int ch = sc.nextInt();
-            sc.nextLine();
+            sc.nextLine(); // clear buffer
 
             switch (ch) {
                 case 1 -> {
@@ -94,7 +94,6 @@ public class MainModule {
                     for (int i = 0; i < count; i++) {
                         System.out.print("Enter Product ID: ");
                         int pid = sc.nextInt();
-                        // Dummy product with only ID; other details fetched in DAO
                         cart.add(new Product(pid, "", "", 0.0, 0, ""));
                     }
 

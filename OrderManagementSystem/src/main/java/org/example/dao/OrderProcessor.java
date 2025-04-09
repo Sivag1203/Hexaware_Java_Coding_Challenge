@@ -5,7 +5,7 @@ import org.example.entity.Electronics;
 import org.example.entity.Product;
 import org.example.entity.User;
 import org.example.exception.OrderNotFoundException;
-import org.example.util.DBUtil;
+import org.example.util.DBConnUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,10 +13,12 @@ import java.util.List;
 
 public class OrderProcessor implements IOrderManagementRepository {
 
+    private static final String DB_PROP_FILE = "src/main/resources/db.properties";
+
     @Override
     public void createUser(User user) {
         try {
-            Connection conn = DBUtil.getConnection();
+            Connection conn = DBConnUtil.getConnection(DB_PROP_FILE);
             String query = "INSERT INTO users VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, user.getUserId());
@@ -33,7 +35,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void createProduct(User user, Product product) {
         try {
-            Connection conn = DBUtil.getConnection();
+            Connection conn = DBConnUtil.getConnection(DB_PROP_FILE);
 
             // Check if user is admin
             String checkQuery = "SELECT role FROM users WHERE userId = ?";
@@ -85,19 +87,17 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void createOrder(User user, List<Product> products) {
         try {
-            Connection conn = DBUtil.getConnection();
+            Connection conn = DBConnUtil.getConnection(DB_PROP_FILE);
 
-            // Check if user exists
             String checkUser = "SELECT * FROM users WHERE userId = ?";
             PreparedStatement userStmt = conn.prepareStatement(checkUser);
             userStmt.setInt(1, user.getUserId());
             ResultSet rs = userStmt.executeQuery();
 
             if (!rs.next()) {
-                createUser(user); // add user if not exists
+                createUser(user);
             }
 
-            // Insert order
             String orderQuery = "INSERT INTO orders(userId) VALUES (?)";
             PreparedStatement orderStmt = conn.prepareStatement(orderQuery, Statement.RETURN_GENERATED_KEYS);
             orderStmt.setInt(1, user.getUserId());
@@ -107,7 +107,6 @@ public class OrderProcessor implements IOrderManagementRepository {
             generated.next();
             int orderId = generated.getInt(1);
 
-            // Insert order items
             for (Product p : products) {
                 String itemQuery = "INSERT INTO order_items(orderId, productId, quantity) VALUES (?, ?, ?)";
                 PreparedStatement itemStmt = conn.prepareStatement(itemQuery);
@@ -126,7 +125,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void cancelOrder(int userId, int orderId) {
         try {
-            Connection conn = DBUtil.getConnection();
+            Connection conn = DBConnUtil.getConnection(DB_PROP_FILE);
 
             String checkQuery = "SELECT * FROM orders WHERE orderId = ? AND userId = ?";
             PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
@@ -160,7 +159,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
         try {
-            Connection conn = DBUtil.getConnection();
+            Connection conn = DBConnUtil.getConnection(DB_PROP_FILE);
             String query = "SELECT * FROM products";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -189,7 +188,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     public List<Product> getOrderByUser(User user) {
         List<Product> list = new ArrayList<>();
         try {
-            Connection conn = DBUtil.getConnection();
+            Connection conn = DBConnUtil.getConnection(DB_PROP_FILE);
             String query = "SELECT p.* FROM products p " +
                     "JOIN order_items oi ON p.productId = oi.productId " +
                     "JOIN orders o ON oi.orderId = o.orderId " +
