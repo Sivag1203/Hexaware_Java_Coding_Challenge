@@ -5,7 +5,7 @@ import org.example.entity.Electronics;
 import org.example.entity.Product;
 import org.example.entity.User;
 import org.example.exception.OrderNotFoundException;
-import org.example.util.DBConnUtil;
+import org.example.util.DBUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void createUser(User user) {
         try {
-            Connection conn = DBConnUtil.getConnection();
+            Connection conn = DBUtil.getConnection();
             String query = "INSERT INTO users VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, user.getUserId());
@@ -33,7 +33,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void createProduct(User user, Product product) {
         try {
-            Connection conn = DBConnUtil.getConnection();
+            Connection conn = DBUtil.getConnection();
 
             // Check if user is admin
             String checkQuery = "SELECT role FROM users WHERE userId = ?";
@@ -85,7 +85,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void createOrder(User user, List<Product> products) {
         try {
-            Connection conn = DBConnUtil.getConnection();
+            Connection conn = DBUtil.getConnection();
 
             // Check if user exists
             String checkUser = "SELECT * FROM users WHERE userId = ?";
@@ -126,7 +126,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     @Override
     public void cancelOrder(int userId, int orderId) {
         try {
-            Connection conn = DBConnUtil.getConnection();
+            Connection conn = DBUtil.getConnection();
 
             String checkQuery = "SELECT * FROM orders WHERE orderId = ? AND userId = ?";
             PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
@@ -160,7 +160,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     public List<Product> getAllProducts() {
         List<Product> list = new ArrayList<>();
         try {
-            Connection conn = DBConnUtil.getConnection();
+            Connection conn = DBUtil.getConnection();
             String query = "SELECT * FROM products";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -189,7 +189,7 @@ public class OrderProcessor implements IOrderManagementRepository {
     public List<Product> getOrderByUser(User user) {
         List<Product> list = new ArrayList<>();
         try {
-            Connection conn = DBConnUtil.getConnection();
+            Connection conn = DBUtil.getConnection();
             String query = "SELECT p.* FROM products p " +
                     "JOIN order_items oi ON p.productId = oi.productId " +
                     "JOIN orders o ON oi.orderId = o.orderId " +
